@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>A Special Surprise For Minh ✨🎂</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Montserrat:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Confetti Canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #080811;
+      color: #fff;
+      overflow-x: hidden;
+      touch-action: manipulation;
+    }
+    .font-royal { font-family: 'Cinzel', serif; }
+    .font-serif-luxury { font-family: 'Playfair Display', serif; }
+
+    /* Custom Animations */
+    @keyframes neon-pulse {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.7)) drop-shadow(0 0 30px rgba(79, 172, 254, 0.4)); }
+      50% { filter: drop-shadow(0 0 25px rgba(0, 242, 254, 1)) drop-shadow(0 0 50px rgba(79, 172, 254, 0.8)); }
+    }
+    @keyframes gold-shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes float-box {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(1deg); }
+    }
+    @keyframes flame-dance {
+      0%, 100% { transform: scale(1) skewX(1deg); }
+      25% { transform: scale(1.15, 0.9) skewX(-2deg); }
+      50% { transform: scale(0.9, 1.1) skewX(3deg); }
+      75% { transform: scale(1.05, 0.95) skewX(-1deg); }
+    }
+    @keyframes ribbon-snip {
+      to { transform: scale(0) rotate(45deg); opacity: 0; }
+    }
+
+    .neon-glow { animation: neon-pulse 2.2s infinite ease-in-out; }
+    .floating-box { animation: float-box 3.2s ease-in-out infinite; }
+    .candle-flame { animation: flame-dance 0.45s ease-in-out infinite alternate; }
+    .record-spinning { animation: spin-slow 4s linear infinite; }
+
+    .gold-gradient-text {
+      background: linear-gradient(120deg, #ffe082 0%, #ffb300 35%, #fff9c4 65%, #ffa000 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gold-shimmer 4s linear infinite;
+    }
+
+    /* Glass card luxury dark */
+    .glass-panel {
+      background: rgba(18, 18, 30, 0.78);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    }
+
+    /* Scratch Canvas */
+    #scratchCanvas {
+      cursor: crosshair;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-3 relative select-none overflow-y-auto">
+
+  <!-- Interactive Sparkles Background -->
+  <canvas id="bgDustCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+  <!-- Stage Progress Tracker (Top Bar) -->
+  <div id="questProgressBar" class="fixed top-3 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-sm px-4 py-2 bg-black/60 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-between shadow-2xl transition-all duration-500">
+    <div class="flex items-center gap-2">
+      <span id="stageBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-600 text-black">
+        QUEST 1/5
+      </span>
+      <span id="stageTitle" class="text-xs font-semibold text-gray-300 tracking-wide">Khởi Động Năng Lượng</span>
+    </div>
+    <div class="flex gap-1.5" id="stepDots">
+      <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]"></span>
+      <span class="w-2 h-2 rounded-full bg-white/20"></span>
+      <span class="w-2 h-2 rounded-full bg-white/20"></span>
+      <span class="w-2 h-2 rounded-full bg-white/20"></span>
+      <span class="w-2 h-2 rounded-full bg-white/20"></span>
+    </div>
+  </div>
+
+  <!-- Music Vinyl Player Widget -->
+  <div class="fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-40 flex items-center gap-2">
+    <!-- Nút tải file nhạc tùy chỉnh -->
+    <label for="customAudioInput" class="bg-black/70 hover:bg-black text-amber-300 p-2.5 rounded-full border border-amber-400/30 backdrop-blur-md shadow-lg cursor-pointer transition-transform hover:scale-110 active:scale-95" title="Đổi bài nhạc nếu muốn">
+      <i class="fa-solid fa-file-audio text-sm"></i>
+      <input type="file" id="customAudioInput" accept="audio/*" class="hidden">
+    </label>
+
+    <!-- Vinyl Mini Player -->
+  <div id="vinylPlayer" class="bg-black/75 backdrop-blur-md border border-white/15 px-3 py-1.5 rounded-full shadow-2xl flex items-center gap-2.5 cursor-pointer hover:border-amber-400/50 transition-all">
+    <div id="vinylDisc" class="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-950 via-zinc-800 to-gray-950 border border-white/20 flex items-center justify-center relative shadow-inner">
+      <div class="w-3 h-3 rounded-full bg-amber-400 border border-black flex items-center justify-center">
+        <div class="w-1 h-1 rounded-full bg-black"></div>
+      </div>
+    </div>
+    <div class="flex flex-col pr-1">
+      <span id="playerTrackName" class="text-[11px] font-bold text-amber-200 tracking-wider">Bông Hoa Chẳng Tồn Tại</span>
+      <span id="playerStatus" class="text-[9px] text-gray-400">Chạm để bật/tắt</span>
+    </div>
+    <button id="musicToggleBtn" class="text-xs text-amber-400 p-1">
+      <i id="musicPlayIcon" class="fa-solid fa-play"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Lớp overlay tinh tế hướng dẫn chạm để nghe nhạc nếu trình duyệt chặn Autoplay tuyệt đối -->
+<div id="autoplayHint" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-black/85 backdrop-blur-md border border-amber-400/50 rounded-full text-[11px] text-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.3)] animate-bounce pointer-events-none">
+  🎵 Chạm vào màn hình bất kỳ để bật nhạc
+</div>
+
+<!-- Audio trực tiếp bài Bông Hoa Chẳng Tồn Tại Remix -->
+<audio id="realAudio" loop preload="auto" playsinline autoplay>
+  <source src="https://files.catbox.moe/s28t3y.mp3" type="audio/mpeg">
+  <source src="https://raw.githubusercontent.com/hieunguyen-dev/media-assets/main/bonghoachangtontai.mp3" type="audio/mpeg">
+</audio>
+
+<!-- =========================================================================
+     STAGE 1: PHÒNG TỐI HUYỀN BÍ & CÔNG TẮC BẬT TIỆC (THE DARK ROOM)
+       ========================================================================= -->
+  <div id="stage1" class="relative z-10 w-full max-w-md flex flex-col items-center text-center p-6 transition-all duration-700">
+    <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border border-cyan-500/30 flex items-center justify-center mb-6 neon-glow relative">
+      <i class="fa-solid fa-bolt-lightning text-4xl sm:text-5xl text-cyan-400"></i>
+      <div class="absolute inset-0 rounded-full border border-cyan-400/20 animate-ping"></div>
+    </div>
+
+    <h2 class="font-royal text-2xl sm:text-3xl font-extrabold tracking-wider text-white mb-2">
+      THE SECRET ROOM
+    </h2>
+    <p class="text-xs sm:text-sm text-gray-400 mb-8 max-w-xs leading-relaxed">
+      Một sự kiện đặc biệt vừa được khởi tạo bí mật. Hãy gạt công tắc neon để mở hệ thống năng lượng!
+    </p>
+
+    <!-- Neon Master Switch -->
+    <div onclick="triggerStage1Switch()" class="w-44 h-16 bg-zinc-900 rounded-full p-2 border-2 border-cyan-400/60 shadow-[0_0_30px_rgba(6,182,212,0.4)] cursor-pointer relative flex items-center justify-between px-3 group hover:border-cyan-300 transition-all active:scale-95">
+      <span class="text-xs font-bold tracking-widest text-cyan-300 group-hover:text-cyan-200 pl-2">GẠT ĐỂ BẬT</span>
+      <div id="switchKnob" class="w-12 h-12 bg-gradient-to-tr from-cyan-400 to-blue-500 rounded-full shadow-[0_0_15px_#22d3ee] flex items-center justify-center text-black font-extrabold text-sm transition-transform duration-300">
+        <i class="fa-solid fa-power-off"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       STAGE 2: BÓC LỚP BẢO MẬT RUY BĂNG CỦA HỘP QUÀ KHO BÁU (THE VAULT BOX)
+       ========================================================================= -->
+  <div id="stage2" class="relative z-10 w-full max-w-md flex flex-col items-center text-center p-4 hidden opacity-0 transition-all duration-700">
+    <div class="glass-panel w-full rounded-3xl p-6 border border-amber-400/30 relative">
+      <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-3 inline-block">
+        Bảo mật 3 lớp ruy băng
+      </span>
+      <h3 class="font-royal text-xl sm:text-2xl font-bold text-amber-200 mb-1">Hộp Quà Hoàng Gia</h3>
+      <p class="text-xs text-gray-300 mb-5">Cắt hết <span id="ribbonsLeft" class="text-amber-400 font-bold">3</span> nút thắt ruy băng để mở khóa quà!</p>
+
+      <!-- Hộp quà tương tác với ruy băng có thể click -->
+      <div class="relative w-56 h-56 mx-auto mb-4 floating-box flex items-center justify-center">
+        <!-- Minh họa hộp quà sang trọng SVG -->
+        <svg viewBox="0 0 200 200" class="w-full h-full filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.8)]" fill="none">
+          <!-- Hộp thân -->
+          <rect x="35" y="80" width="130" height="95" rx="14" fill="#1e1b4b" stroke="#f59e0b" stroke-width="2"/>
+          <rect x="25" y="60" width="150" height="30" rx="8" fill="#312e81" stroke="#fbbf24" stroke-width="2"/>
+          
+          <!-- Họa tiết vân hoàng gia -->
+          <circle cx="100" cy="125" r="28" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6"/>
+          <polygon points="100,105 106,120 122,120 109,130 114,145 100,135 86,145 91,130 78,120 94,120" fill="#f59e0b" opacity="0.8"/>
+        </svg>
+
+        <!-- 3 Dải ruy băng tương tác phủ lên trên -->
+        <div id="ribbon1" onclick="snipRibbon(1, event)" class="absolute w-44 h-8 bg-gradient-to-r from-rose-500 via-pink-400 to-rose-600 rounded-full shadow-lg border border-white/40 flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform rotate-12 top-16">
+          <span class="text-[11px] font-bold text-white tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-scissors text-xs"></i> Cắt Ruy Băng #1
+          </span>
+        </div>
+
+        <div id="ribbon2" onclick="snipRibbon(2, event)" class="absolute w-44 h-8 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-full shadow-lg border border-white/40 flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform -rotate-12 top-28">
+          <span class="text-[11px] font-bold text-black tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-scissors text-xs"></i> Cắt Ruy Băng #2
+          </span>
+        </div>
+
+        <div id="ribbon3" onclick="snipRibbon(3, event)" class="absolute w-40 h-8 bg-gradient-to-r from-cyan-500 via-teal-300 to-blue-500 rounded-full shadow-lg border border-white/40 flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform rotate-3 top-40">
+          <span class="text-[11px] font-bold text-black tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-scissors text-xs"></i> Cắt Nốt Ruy Băng #3
+          </span>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-gray-400 italic">
+        Chạm trực tiếp vào từng ruy băng để cắt đứt niêm phong ✨
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       STAGE 3: BÁNH KEM 3 TẦNG & THỔI NẾN TẬP TRUNG (THE CANDLE CEREMONY)
+       ========================================================================= -->
+  <div id="stage3" class="relative z-10 w-full max-w-md flex flex-col items-center text-center p-4 hidden opacity-0 transition-all duration-700">
+    <div class="glass-panel w-full rounded-3xl p-6 border border-rose-500/30 relative">
+      <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 mb-2 inline-block">
+        Điều ước tuổi mới
+      </span>
+      <h3 class="font-royal text-2xl font-extrabold text-white mb-1">Ước Nguyện & Thổi Nến</h3>
+      <p id="candleInstruction" class="text-xs text-rose-300 mb-6">
+        Hãy nhắm mắt nghĩ về 1 điều ước, sau đó <strong>bấm & giữ nút thổi nến</strong> bên dưới!
+      </p>
+
+      <!-- Bánh kem 3 tầng hoành tráng -->
+      <div class="relative flex flex-col items-center mb-6">
+        <!-- Khói khi nến tắt -->
+        <div id="stageSmoke" class="hidden absolute -top-12 text-gray-400 text-3xl font-extrabold">💨</div>
+
+        <!-- Ngọn lửa nến -->
+        <div id="royalFlame" class="w-5 h-8 bg-gradient-to-t from-red-500 via-amber-400 to-yellow-100 rounded-full candle-flame shadow-[0_0_20px_#f59e0b] relative cursor-pointer mb-0.5">
+          <div class="w-1.5 h-1.5 bg-white rounded-full absolute top-1 left-2"></div>
+        </div>
+        
+        <!-- Cây nến vàng sọc trắng -->
+        <div class="w-4 h-12 bg-gradient-to-b from-amber-200 via-yellow-400 to-amber-300 rounded-t-sm shadow-md border border-amber-600/40 relative">
+          <div class="w-1 h-3 bg-neutral-800 -top-3 absolute left-1/2 -translate-x-1/2"></div>
+        </div>
+
+        <!-- Tầng 1 (Trên) -->
+        <div class="w-32 h-10 bg-gradient-to-r from-pink-300 via-rose-200 to-pink-300 rounded-t-2xl border-b-2 border-rose-400 shadow flex items-center justify-around px-3">
+          <span class="text-xs">🍓</span><span class="text-xs">✨</span><span class="text-xs">🍓</span>
+        </div>
+
+        <!-- Tầng 2 (Giữa) -->
+        <div class="w-44 h-11 bg-gradient-to-r from-purple-900 via-indigo-800 to-purple-900 rounded-t-xl border-b-2 border-amber-400/50 shadow flex items-center justify-around px-4">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-300 shadow-[0_0_6px_#fde047]"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-300 shadow-[0_0_6px_#67e8f9]"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-300 shadow-[0_0_6px_#fda4af]"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-300 shadow-[0_0_6px_#fde047]"></span>
+        </div>
+
+        <!-- Tầng 3 (Đáy) -->
+        <div class="w-56 h-12 bg-gradient-to-r from-amber-800 via-yellow-700 to-amber-900 rounded-b-2xl shadow-2xl flex items-center justify-between px-6 border-t border-amber-400/30">
+          <span class="text-xs font-bold text-amber-200 tracking-wider">🌟 SPECIAL DAY 🌟</span>
+        </div>
+        <!-- Đế bánh vàng bạc -->
+        <div class="w-64 h-2.5 bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 rounded-full mt-0.5 shadow-lg"></div>
+      </div>
+
+      <!-- Nút bấm giữ để thổi (Progress bar khi giữ) -->
+      <div class="relative w-full max-w-xs mx-auto">
+        <button id="blowHoldBtn" class="w-full py-3.5 px-4 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 rounded-2xl font-royal font-bold text-sm tracking-wider shadow-lg active:scale-95 transition-all relative overflow-hidden flex items-center justify-center gap-2 border border-white/20">
+          <div id="blowProgressFill" class="absolute left-0 top-0 bottom-0 bg-white/30 w-0 transition-none"></div>
+          <i class="fa-solid fa-wind text-base"></i>
+          <span id="blowButtonLabel">GIỮ ĐỂ THỔI NẾN 🎂</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       STAGE 4: THƯ TAY HOÀNG GIA & THẺ VINH DANH VIP (VIP BOY PROFILE)
+       ========================================================================= -->
+  <div id="stage4" class="relative z-10 w-full max-w-md flex flex-col items-center text-center p-3 hidden opacity-0 transition-all duration-700">
+    <div class="glass-panel w-full rounded-3xl p-6 border border-amber-400/40 relative shadow-2xl overflow-hidden">
+      <!-- Glow trang trí -->
+      <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl"></div>
+
+      <!-- Danh hiệu VIP -->
+      <div class="flex items-center justify-center gap-2 mb-2">
+        <i class="fa-solid fa-crown text-amber-400 text-lg"></i>
+        <span class="text-xs font-royal tracking-widest text-amber-300 font-bold uppercase">OFFICIAL VIP HONOREE</span>
+        <i class="fa-solid fa-crown text-amber-400 text-lg"></i>
+      </div>
+
+      <h1 class="font-royal text-2xl sm:text-3xl font-extrabold gold-gradient-text tracking-wide mb-1">
+        Nguyễn Ngô Quang Minh
+      </h1>
+      <p class="text-[11px] text-gray-400 uppercase tracking-widest mb-4">Happy Birthday • New Age • New Heights</p>
+
+      <!-- Nội dung thư gõ máy chữ cảm xúc -->
+      <div class="bg-black/60 rounded-2xl p-4 sm:p-5 border border-amber-500/20 text-left min-h-[120px] mb-5 relative">
+        <div id="typewriterStage4" class="text-gray-200 text-xs sm:text-sm font-medium leading-relaxed whitespace-pre-line font-serif-luxury"></div>
+        <span id="typeCursor4" class="inline-block w-1.5 h-4 bg-amber-400 ml-1 animate-pulse"></span>
+      </div>
+
+      <!-- Thẻ chỉ số nhân vật (VIP Birthday Attributes) -->
+      <div class="grid grid-cols-3 gap-2 mb-5">
+        <div class="bg-zinc-900/80 p-2.5 rounded-xl border border-white/10 text-center">
+          <div class="text-[10px] text-gray-400 uppercase font-semibold">Tích Cực</div>
+          <div class="text-sm font-bold text-emerald-400 mt-0.5">100% ☀️</div>
+        </div>
+        <div class="bg-zinc-900/80 p-2.5 rounded-xl border border-white/10 text-center">
+          <div class="text-[10px] text-gray-400 uppercase font-semibold">Chiến Thắng</div>
+          <div class="text-sm font-bold text-amber-400 mt-0.5">MAX LEVEL ⚔️</div>
+        </div>
+        <div class="bg-zinc-900/80 p-2.5 rounded-xl border border-white/10 text-center">
+          <div class="text-[10px] text-gray-400 uppercase font-semibold">Thành Công</div>
+          <div class="text-sm font-bold text-cyan-400 mt-0.5">9999+ 🏆</div>
+        </div>
+      </div>
+
+      <button onclick="goToStage(5)" class="w-full py-3 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 text-black font-royal font-bold text-xs sm:text-sm rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
+        <span>KHÁM PHÁ THẺ CÀO MAY MẮN & TIỆC CUỐI</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       STAGE 5: MINI-GAME CÀO THẺ MAY MẮN & BẮN PHÁO HOA VÔ TẬN (GRAND FINALE)
+       ========================================================================= -->
+  <div id="stage5" class="relative z-10 w-full max-w-md flex flex-col items-center text-center p-3 hidden opacity-0 transition-all duration-700">
+    <div class="glass-panel w-full rounded-3xl p-5 border border-purple-500/40 relative shadow-2xl">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <h3 class="font-royal text-base sm:text-lg font-bold text-purple-300 flex items-center gap-1.5">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Thẻ Cào May Mắn
+        </h3>
+        <span class="text-[10px] bg-purple-500/20 text-purple-200 px-2 py-0.5 rounded-full border border-purple-400/30">
+          Dùng ngón tay/chuột cào
+        </span>
+      </div>
+
+      <!-- Khu vực Thẻ Cào (Scratch Card Canvas) -->
+      <div class="relative w-full h-36 rounded-2xl overflow-hidden border-2 border-amber-400/50 shadow-inner mb-4 flex items-center justify-center bg-gradient-to-br from-amber-950 via-zinc-900 to-purple-950">
+        <!-- Lớp quà bí mật nằm bên dưới -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center p-3 text-center">
+          <span class="text-2xl mb-1">🎉 🏆 🌟</span>
+          <div class="font-royal font-black text-sm text-yellow-300 uppercase tracking-wider">
+            Lộc Phát Đại Cát • Đánh Đâu Thắng Đó!
+          </div>
+          <p class="text-[11px] text-gray-200 mt-1 font-semibold">
+            Năm mới rạng rỡ, tiền tài thịnh vượng, vạn sự như ý!
+          </p>
+        </div>
+        <!-- Canvas lớp phủ màu bạc có thể cào -->
+        <canvas id="scratchCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
+      </div>
+
+      <!-- Trình tương tác pháo hoa & bắn tim không giới hạn -->
+      <div class="grid grid-cols-2 gap-2.5 mb-4">
+        <button onclick="launchFireworkStorm()" class="py-3 px-3 bg-gradient-to-r from-red-500 to-rose-600 rounded-2xl font-bold text-xs shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 border border-white/20">
+          <i class="fa-solid fa-fire text-amber-300"></i>
+          <span>Bắn Pháo Hoa 🎆</span>
+        </button>
+
+        <button onclick="launchHeartExplosion(event)" class="py-3 px-3 bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl font-bold text-xs shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 border border-white/20">
+          <i class="fa-solid fa-heart text-pink-200 animate-ping text-[10px]"></i>
+          <span>Bắn Tim 💖</span>
+        </button>
+      </div>
+
+      <!-- Lời chúc kết thúc và nút sao chép link tùy biến -->
+      <div class="pt-3 border-t border-white/10 flex flex-col items-center text-xs text-gray-400 gap-2">
+        <p class="italic text-[11px]">Gửi trọn những điều tuyệt vời nhất đến Nguyễn Ngô Quang Minh 🥂</p>
+        <button onclick="replayQuest()" class="text-amber-300 hover:text-amber-200 font-bold underline flex items-center gap-1">
+          <i class="fa-solid fa-rotate-left"></i> Chơi lại từ đầu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Synthesizer & Logic Scripts -->
+  <script>
+    /* =========================================================================
+       1. WEB AUDIO SOUND EFFECTS GENERATOR (Không dùng âm Happy Birthday)
+       ========================================================================= */
+    class RetroSoundFX {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      // Tiếng bật công tắc cơ học
+      switchClick() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.08);
+      }
+      // Tiếng cắt ruy băng giòn giã
+      snip() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.1);
+      }
+      // Tiếng thổi tắt nến
+      blow() {
+        this.init();
+        const bufferSize = this.ctx.sampleRate * 0.4;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.4));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 400;
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start();
+      }
+      // Tiếng thành công chuông ngân vang
+      triumph() {
+        this.init();
+        const chord = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        chord.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.001, this.ctx.currentTime + idx * 0.08);
+          gain.gain.linearRampToValueAtTime(0.2, this.ctx.currentTime + idx * 0.08 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + idx * 0.08 + 0.8);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.08);
+          osc.stop(this.ctx.currentTime + idx * 0.08 + 0.8);
+        });
+      }
+    }
+    const sfx = new RetroSoundFX();
+
+    /* =========================================================================
+       2. HỆ THỐNG PHÁT NHẠC "BÔNG HOA CHẲNG TỒN TẠI" VỚI AUTOPLAY THÔNG MINH
+       ========================================================================= */
+    const realAudio = document.getElementById('realAudio');
+    const customInput = document.getElementById('customAudioInput');
+    const autoplayHint = document.getElementById('autoplayHint');
+    let hasAttemptedUnlock = false;
+
+    function playMainSong() {
+      sfx.init();
+      return realAudio.play().then(() => {
+        updatePlayerUI(true);
+        autoplayHint.classList.add('hidden');
+      }).catch(err => {
+        console.log("Autoplay policy prevented audio start. Waiting for user interaction...", err);
+        autoplayHint.classList.remove('hidden');
+      });
+    }
+
+    function pauseMainSong() {
+      realAudio.pause();
+      updatePlayerUI(false);
+    }
+
+    function toggleMainSong() {
+      if (realAudio.paused) {
+        playMainSong();
+      } else {
+        pauseMainSong();
+      }
+    }
+
+    // Tự động phát ngay khi vừa load DOM/Window
+    window.addEventListener('DOMContentLoaded', () => {
+      playMainSong();
+    });
+    window.addEventListener('load', () => {
+      playMainSong();
+    });
+
+    // Bắt bất kỳ cú chạm/click/phím đầu tiên nào trên toàn trang để mở khóa âm thanh ngay lập tức
+    function unlockAudioOnFirstInteraction() {
+      if (!hasAttemptedUnlock) {
+        hasAttemptedUnlock = true;
+        playMainSong();
+        ['click', 'touchstart', 'touchend', 'keydown', 'scroll'].forEach(evt => {
+          window.removeEventListener(evt, unlockAudioOnFirstInteraction, true);
+        });
+      }
+    }
+
+    ['click', 'touchstart', 'touchend', 'keydown', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, unlockAudioOnFirstInteraction, { capture: true, passive: true });
+    });
+
+    customInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        realAudio.src = URL.createObjectURL(file);
+        playMainSong();
+        document.getElementById('playerTrackName').innerText = file.name.slice(0, 18);
+      }
+    });
+
+    function updatePlayerUI(playing) {
+      const disc = document.getElementById('vinylDisc');
+      const icon = document.getElementById('musicPlayIcon');
+      const status = document.getElementById('playerStatus');
+      if (playing) {
+        disc.classList.add('record-spinning');
+        icon.className = "fa-solid fa-pause";
+        status.innerText = "Đang phát 🎵";
+        status.classList.add('text-amber-300');
+      } else {
+        disc.classList.remove('record-spinning');
+        icon.className = "fa-solid fa-play";
+        status.innerText = "Tạm dừng";
+        status.classList.remove('text-amber-300');
+      }
+    }
+
+    document.getElementById('vinylPlayer').addEventListener('click', toggleMainSong);
+
+    /* =========================================================================
+       3. QUẢN LÝ TIẾN TRÌNH 5 GIAI ĐOẠN (5 STAGES CONTROLLER)
+       ========================================================================= */
+    let currentStage = 1;
+    const stageTitles = [
+      "Khởi Động Năng Lượng",
+      "Gỡ Niêm Phong Ruy Băng",
+      "Thổi Nến & Ước Nguyện",
+      "Vinh Danh Hoàng Gia",
+      "Thẻ Cào May Mắn & Kết Tiệc"
+    ];
+
+    function goToStage(stageNum) {
+      const oldStageEl = document.getElementById(`stage${currentStage}`);
+      const newStageEl = document.getElementById(`stage${stageNum}`);
+
+      if (oldStageEl) {
+        oldStageEl.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+          oldStageEl.classList.add('hidden');
+          showNewStage(stageNum, newStageEl);
+        }, 400);
+      } else {
+        showNewStage(stageNum, newStageEl);
+      }
+
+      currentStage = stageNum;
+      updateProgressBar(stageNum);
+    }
+
+    function showNewStage(num, el) {
+      el.classList.remove('hidden');
+      setTimeout(() => {
+        el.classList.remove('opacity-0', 'scale-95');
+        el.classList.add('opacity-100', 'scale-100');
+      }, 50);
+
+      if (num === 4) {
+        startTypewriter();
+      }
+      if (num === 5) {
+        initScratchCard();
+        launchFireworkStorm();
+      }
+    }
+
+    function updateProgressBar(num) {
+      document.getElementById('stageBadge').innerText = `QUEST ${num}/5`;
+      document.getElementById('stageTitle').innerText = stageTitles[num - 1];
+
+      const dots = document.getElementById('stepDots').children;
+      for (let i = 0; i < dots.length; i++) {
+        if (i < num) {
+          dots[i].className = "w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]";
+        } else {
+          dots[i].className = "w-2 h-2 rounded-full bg-white/20";
+        }
+      }
+    }
+
+    /* STAGE 1: BẬT CÔNG TẮC */
+    function triggerStage1Switch() {
+      sfx.switchClick();
+      const knob = document.getElementById('switchKnob');
+      knob.style.transform = 'translateX(90px)';
+
+      // Flash màn hình sáng rực
+      const flash = document.createElement('div');
+      flash.className = 'fixed inset-0 bg-white z-50 pointer-events-none transition-opacity duration-700';
+      document.body.appendChild(flash);
+
+      // Kích hoạt ngay bài hát Bông Hoa Chẳng Tồn Tại
+      playMainSong();
+
+      setTimeout(() => {
+        flash.style.opacity = '0';
+        setTimeout(() => flash.remove(), 700);
+        goToStage(2);
+      }, 350);
+    }
+
+    /* STAGE 2: CẮT 3 RUY BĂNG */
+    let ribbonsCount = 3;
+    function snipRibbon(id, e) {
+      sfx.snip();
+      const el = document.getElementById(`ribbon${id}`);
+      el.style.animation = 'ribbon-snip 0.4s forwards';
+
+      confetti({
+        particleCount: 25,
+        spread: 50,
+        origin: {
+          x: e.clientX / window.innerWidth,
+          y: e.clientY / window.innerHeight
+        }
+      });
+
+      ribbonsCount--;
+      document.getElementById('ribbonsLeft').innerText = ribbonsCount;
+
+      if (ribbonsCount <= 0) {
+        sfx.triumph();
+        setTimeout(() => {
+          goToStage(3);
+        }, 600);
+      }
+    }
+
+    /* STAGE 3: GIỮ ĐỂ THỔI NẾN */
+    const blowBtn = document.getElementById('blowHoldBtn');
+    const fillEl = document.getElementById('blowProgressFill');
+    let holdTimer = null;
+    let holdProgress = 0;
+    let isBlown = false;
+
+    function startBlowHold() {
+      if (isBlown) return;
+      holdProgress = 0;
+      holdTimer = setInterval(() => {
+        holdProgress += 4;
+        fillEl.style.width = `${holdProgress}%`;
+        if (holdProgress >= 100) {
+          clearInterval(holdTimer);
+          blowOutCandleSuccess();
+        }
+      }, 35);
+    }
+
+    function cancelBlowHold() {
+      if (isBlown) return;
+      clearInterval(holdTimer);
+      holdProgress = 0;
+      fillEl.style.width = '0%';
+    }
+
+    blowBtn.addEventListener('mousedown', startBlowHold);
+    blowBtn.addEventListener('mouseup', cancelBlowHold);
+    blowBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startBlowHold(); });
+    blowBtn.addEventListener('touchend', cancelBlowHold);
+
+    function blowOutCandleSuccess() {
+      isBlown = true;
+      sfx.blow();
+
+      document.getElementById('royalFlame').style.display = 'none';
+      document.getElementById('stageSmoke').classList.remove('hidden');
+      document.getElementById('candleInstruction').innerText = "✨ Ngọn nến đã tắt, điều ước đang bay lên các vì sao! ✨";
+      document.getElementById('candleInstruction').className = "text-xs text-amber-300 font-bold mb-6";
+      document.getElementById('blowButtonLabel').innerText = "ĐÃ THỔI TẮT NẾN THÀNH CÔNG! ✨";
+
+      sfx.triumph();
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+
+      setTimeout(() => {
+        goToStage(4);
+      }, 1300);
+    }
+
+    /* STAGE 4: GÕ CHỮ THƯ TAY */
+    const recipientMessage = `Chúc em Minh tuổi mới luôn vui vẻ tích cực, đánh đâu thắng đó, ngày càng trưởng thành và gặt hái được nhiều thành công nhé! 🥂🎂✨`;
+
+    function startTypewriter() {
+      const container = document.getElementById('typewriterStage4');
+      const cursor = document.getElementById('typeCursor4');
+      container.innerHTML = "";
+      let idx = 0;
+
+      function type() {
+        if (idx < recipientMessage.length) {
+          const ch = recipientMessage.charAt(idx);
+          container.innerHTML += (ch === '\n' ? '<br>' : ch);
+          idx++;
+          setTimeout(type, ch === ',' ? 120 : (ch === '.' ? 220 : 35));
+        } else {
+          cursor.style.display = 'none';
+        }
+      }
+      type();
+    }
+
+    /* STAGE 5: MINI GAME THẺ CÀO BẰNG CANVAS */
+    function initScratchCard() {
+      const canvas = document.getElementById('scratchCanvas');
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+
+      // Tô màu bạc tráng gương
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, '#94a3b8');
+      grad.addColorStop(0.5, '#cbd5e1');
+      grad.addColorStop(1, '#64748b');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Thêm chữ hướng dẫn cào
+      ctx.font = 'bold 13px Montserrat';
+      ctx.fillStyle = '#1e293b';
+      ctx.textAlign = 'center';
+      ctx.fillText('✨ CÀO LỚP BẠC ĐỂ NHẬN QUẺ MAY MẮN ✨', canvas.width / 2, canvas.height / 2 + 5);
+
+      let isDrawing = false;
+      function scratch(x, y) {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, 18, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function getPos(e) {
+        const bounds = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: clientX - bounds.left,
+          y: clientY - bounds.top
+        };
+      }
+
+      canvas.addEventListener('mousedown', (e) => { isDrawing = true; const p = getPos(e); scratch(p.x, p.y); });
+      window.addEventListener('mouseup', () => isDrawing = false);
+      canvas.addEventListener('mousemove', (e) => { if (isDrawing) { const p = getPos(e); scratch(p.x, p.y); } });
+
+      canvas.addEventListener('touchstart', (e) => { isDrawing = true; const p = getPos(e); scratch(p.x, p.y); });
+      window.addEventListener('touchend', () => isDrawing = false);
+      canvas.addEventListener('touchmove', (e) => { if (isDrawing) { const p = getPos(e); scratch(p.x, p.y); } });
+    }
+
+    /* BẮN PHÁO HOA LIÊN HOÀN */
+    function launchFireworkStorm() {
+      const end = Date.now() + 1500;
+      const colors = ['#f59e0b', '#ec4899', '#3b82f6', '#10b981', '#f43f5e'];
+
+      (function frame() {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: colors
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: colors
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      }());
+    }
+
+    /* BẮN TRÁI TIM */
+    function launchHeartExplosion(e) {
+      const originX = e ? e.clientX : window.innerWidth / 2;
+      const originY = e ? e.clientY : window.innerHeight / 2;
+      const emojis = ['💖', '🔥', '✨', '👑', '⭐'];
+
+      for (let i = 0; i < 14; i++) {
+        const heart = document.createElement('div');
+        heart.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+        heart.className = 'fixed pointer-events-none text-xl transition-all duration-1000 ease-out z-50';
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * 120 + 50;
+        const targetX = originX + Math.cos(angle) * dist;
+        const targetY = originY + Math.sin(angle) * dist - 50;
+
+        heart.style.left = `${originX}px`;
+        heart.style.top = `${originY}px`;
+        heart.style.opacity = '1';
+
+        document.body.appendChild(heart);
+
+        requestAnimationFrame(() => {
+          heart.style.left = `${targetX}px`;
+          heart.style.top = `${targetY}px`;
+          heart.style.transform = `scale(${Math.random() * 0.8 + 1})`;
+          heart.style.opacity = '0';
+        });
+
+        setTimeout(() => heart.remove(), 1050);
+      }
+    }
+
+    function replayQuest() {
+      location.reload();
+    }
+
+    /* =========================================================================
+       4. HIỆU ỨNG HẠT BỤI PHÁT SÁNG NỀN (BACKGROUND DUST PARTICLES)
+       ========================================================================= */
+    const dustCanvas = document.getElementById('bgDustCanvas');
+    const dustCtx = dustCanvas.getContext('2d');
+    let dustParticles = [];
+
+    function resizeDust() {
+      dustCanvas.width = window.innerWidth;
+      dustCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeDust);
+    resizeDust();
+
+    class Dust {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * dustCanvas.width;
+        this.y = Math.random() * dustCanvas.height;
+        this.radius = Math.random() * 2 + 0.5;
+        this.speedY = -(Math.random() * 0.3 + 0.1);
+        this.speedX = (Math.random() - 0.5) * 0.2;
+        this.alpha = Math.random() * 0.6 + 0.1;
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX;
+        if (this.y < 0) this.reset();
+      }
+      draw() {
+        dustCtx.save();
+        dustCtx.globalAlpha = this.alpha;
+        dustCtx.fillStyle = '#fde047';
+        dustCtx.beginPath();
+        dustCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        dustCtx.fill();
+        dustCtx.restore();
+      }
+    }
+
+    for (let i = 0; i < 45; i++) dustParticles.push(new Dust());
+
+    function renderDust() {
+      dustCtx.clearRect(0, 0, dustCanvas.width, dustCanvas.height);
+      dustParticles.forEach(d => {
+        d.update();
+        d.draw();
+      });
+      requestAnimationFrame(renderDust);
+    }
+    renderDust();
+  </script>
+</body>
+</html>
